@@ -1,4 +1,4 @@
-# URL-Short 🚀
+# URL-Short 
 
 A simple URL shortener built with **Node.js**, **Express**, and **MongoDB** — designed for beginners to understand the basics of building a backend web service.
 
@@ -6,7 +6,7 @@ This project lets you convert long URLs into short, shareable links (similar to 
 
 ---
 
-## 🧠 What This Does
+## What This Does
 
 When a user sends a long URL to this service:
 
@@ -16,7 +16,7 @@ When a user sends a long URL to this service:
 
 ---
 
-## 📦 Technologies Used
+## Technologies Used
 
 ✔ Node.js & Express (server)  
 ✔ MongoDB & Mongoose (database)  
@@ -25,7 +25,7 @@ When a user sends a long URL to this service:
 
 ---
 
-## 🚀 Features
+## Features
 
 - Shorten long URLs
 - Redirect short URLs to full URLs
@@ -33,7 +33,7 @@ When a user sends a long URL to this service:
 
 ---
 
-## 📥 Prerequisites
+## Prerequisites
 
 Before you begin, make sure you have:
 
@@ -42,7 +42,7 @@ Before you begin, make sure you have:
 
 ---
 
-## ⛏ Setup & Installation
+## Setup & Installation
 
 1. **Clone the repository**
 
@@ -79,7 +79,7 @@ npm run dev
 The server should start on http://localhost:5000.
 
 
-**📁 Typical Folder Structure**
+** Typical Folder Structure**
 .
 ├── controllers/     # Route logic
 ├── models/          # Mongoose models
