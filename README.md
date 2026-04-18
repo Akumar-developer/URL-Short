@@ -82,9 +82,15 @@ The server should start on http://localhost:5000.
 ** Typical Folder Structure**
 .
 ├── controllers/     # Route logic
+
 ├── models/          # Mongoose models
+
 ├── routes/          # API endpoints
+
 ├── index.js         # App entry point
+
 ├── connectDB.js     # MongoDB connection
+
 ├── package.json
+
 └── .env
