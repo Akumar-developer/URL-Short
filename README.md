@@ -1,8 +1,9 @@
+
 # 🔗 URL-Short
 
 A simple **URL Shortener** built with **Node.js**, **Express**, and **MongoDB**. This project demonstrates how to build a RESTful backend service that converts long URLs into short, shareable links.
 
-The application uses **MongoDB Atlas** for persistent storage and supports running either locally or inside a **Docker container**.
+The application uses **MongoDB Atlas** for persistent storage and supports running either locally or inside a **Docker container** using a properly optimized multi-stage build.
 
 ---
 
@@ -12,7 +13,8 @@ The application uses **MongoDB Atlas** for persistent storage and supports runni
 * Redirect short URLs to their original destination
 * MongoDB Atlas integration
 * Environment variable support with `dotenv`
-* Docker support for containerized deployment
+* Multi-stage Docker build for a smaller, production-only image
+* Non-root container user for reduced attack surface
 * Beginner-friendly project structure
 
 ---
@@ -38,7 +40,7 @@ The application uses **MongoDB Atlas** for persistent storage and supports runni
 ├── routes/           # API routes
 ├── connectDB.js      # MongoDB connection
 ├── index.js          # Application entry point
-├── Dockerfile        # Containerization
+├── Dockerfile         # Multi-stage containerization
 ├── .dockerignore
 ├── package.json
 └── README.md
@@ -52,7 +54,6 @@ The application uses **MongoDB Atlas** for persistent storage and supports runni
 
 ```bash
 git clone https://github.com/Akumar-developer/URL-Short.git
-
 cd URL-Short
 ```
 
@@ -121,6 +122,41 @@ http://localhost:3000
 
 ---
 
+## 🐳 Multi-Stage Build: Why and What Changed
+
+This Dockerfile went through a real optimization pass, not just a template copy-paste.
+
+**The mistake:** an earlier version of this Dockerfile ended its runtime stage with `COPY --from=builder /app .` — copying the builder stage's entire directory, including its full `node_modules` (built with devDependencies included). That one line silently overwrote the clean production-only `node_modules` the runtime stage had already installed with `npm ci --omit=dev`. The build was multi-stage in name, but shipped dev dependencies into production anyway.
+
+**The fix:** copy only the specific artifacts the runtime actually needs from the builder stage, instead of the whole directory:
+
+```dockerfile
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/index.js ./
+COPY --from=builder /app/controllers ./controllers
+COPY --from=builder /app/models ./models
+COPY --from=builder /app/routes ./routes
+```
+
+**Measured result** (`docker images`, before vs. after the fix):
+
+| | Disk Usage | Content Size |
+|---|---|---|
+| Before (buggy) | 320MB | 75.3MB |
+| After (fixed) | 273MB | 63.1MB |
+| **Improvement** | **−14.7%** | **−16.2%** |
+
+The image also runs as a non-root user (`appuser`), created and applied in the runtime stage, rather than running the container as root by default.
+
+**Takeaway:** `COPY --from=builder` copies exactly what you point it at — nothing more, nothing less. Multi-stage builds don't optimize automatically; the discipline is in deciding precisely what crosses the stage boundary.
+
+---
+
+<img width="1366" height="640" alt="Screenshot (12)" src="https://github.com/user-attachments/assets/0e5fd3bd-24e2-4f36-94f2-7f5d03aa76cc" />
+
+---
+
 ## Environment Variables
 
 | Variable      | Description                        |
@@ -135,7 +171,7 @@ http://localhost:3000
 * Never commit your `.env` file.
 * Keep your MongoDB Atlas credentials private.
 * Use environment variables to provide sensitive configuration at runtime.
-* The Docker image is designed to run the application without embedding secrets.
+* The Docker image runs as a non-root user and is built to avoid embedding secrets.
 
 ---
 
@@ -170,6 +206,5 @@ Example Request
 The server looks up the short URL in MongoDB and redirects the client to the original URL.
 
 ---
-
 
 This project is licensed under the MIT License.
